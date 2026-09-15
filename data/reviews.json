@@ -1,0 +1,26 @@
+[
+  {
+    "id": 1789435276488,
+    "title": "Interstellar",
+    "rating": 5,
+    "review": "A memorable science fiction movie with a strong story."
+  },
+  {
+    "id": 1789435520940,
+    "title": "Little Women",
+    "rating": 4,
+    "review": "An engaging story with memorable characters."
+  },
+  {
+    "id": 1789436558369,
+    "title": "Spirited Away",
+    "rating": 5,
+    "review": "An imaginative story with memorable characters and settings."
+  },
+  {
+    "id": 1789436619080,
+    "title": "Parasite",
+    "rating": 4,
+    "review": "Good story."
+  }
+]

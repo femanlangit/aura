@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Aura | Movie Catalogue</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+  <header>
+    <div class="site-header">
+      <a class="logo" href="#home">Aura</a>
+
+      <nav aria-label="Main navigation">
+        <a href="#catalogue">Catalogue</a>
+        <a href="#review">Write a Review</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero" id="home">
+      <p class="eyebrow">Find your next watch</p>
+      <h1>Discover movies. Share what you think.</h1>
+      <p>
+        Search the Aura catalogue for movie information and share
+        your own rating and review.
+      </p>
+      <a class="button" href="#catalogue">Browse the Catalogue</a>
+    </section>
+
+    <section class="section" id="catalogue">
+      <div class="section-heading">
+        <p class="eyebrow">Movie Catalogue</p>
+        <h2>Search for a movie</h2>
+        <p>Enter a movie title to find it in the Aura catalogue.</p>
+      </div>
+
+      <form class="search-form" id="search-form">
+        <label for="search-title">Movie title</label>
+
+        <div class="search-controls">
+          <input
+            type="text"
+            id="search-title"
+            name="title"
+            placeholder="e.g., Interstellar"
+          >
+          <button type="submit">Search</button>
+        </div>
+      </form>
+
+      <div
+        class="message"
+        id="search-message"
+        role="status"
+        aria-live="polite"
+      ></div>
+
+      <div class="movie-grid" id="movie-results">
+        <!-- Movie information will appear here. -->
+      </div>
+    </section>
+
+    <section class="section review-section" id="review">
+      <div class="section-heading">
+        <p class="eyebrow">Your Review</p>
+        <h2>Share your thoughts</h2>
+        <p>
+          Rate a movie you have watched and tell other viewers
+          what you thought about it.
+        </p>
+      </div>
+
+      <form class="review-form" id="review-form">
+        <div class="form-field">
+          <label for="review-title">Movie title</label>
+          <input
+            type="text"
+            id="review-title"
+            name="title"
+            required
+          >
+        </div>
+
+        <div class="form-field">
+          <label for="rating">Rating</label>
+          <select id="rating" name="rating" required>
+            <option value="">Select a rating</option>
+            <option value="5">5 - Excellent</option>
+            <option value="4">4 - Very Good</option>
+            <option value="3">3 - Good</option>
+            <option value="2">2 - Fair</option>
+            <option value="1">1 - Poor</option>
+          </select>
+        </div>
+
+        <div class="form-field">
+          <label for="review-text">Review</label>
+          <textarea
+            id="review-text"
+            name="review"
+            rows="5"
+            required
+            placeholder="What did you think about the movie?"
+          ></textarea>
+        </div>
+
+        <button type="submit">Submit Review</button>
+
+        <div
+          class="message"
+          id="review-message"
+          role="status"
+          aria-live="polite"
+        ></div>
+      </form>
+    </section>
+  </main>
+
+  <footer>
+    <p>Aura Movie Catalogue</p>
+    <p>Discover movies and share your reviews.</p>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,42 @@
+[
+  {
+    "id": 1,
+    "title": "Interstellar",
+    "year": 2014,
+    "genre": "Science Fiction",
+    "director": "Christopher Nolan",
+    "description": "A team of explorers travels through a wormhole in space in search of a new home for humanity."
+  },
+  {
+    "id": 2,
+    "title": "Little Women",
+    "year": 2019,
+    "genre": "Drama",
+    "director": "Greta Gerwig",
+    "description": "Four sisters pursue their ambitions while navigating family, love, and change."
+  },
+  {
+    "id": 3,
+    "title": "Spirited Away",
+    "year": 2001,
+    "genre": "Animation",
+    "director": "Hayao Miyazaki",
+    "description": "A young girl enters a mysterious spirit world and must find a way to save her parents."
+  },
+  {
+    "id": 4,
+    "title": "Parasite",
+    "year": 2019,
+    "genre": "Thriller",
+    "director": "Bong Joon Ho",
+    "description": "A struggling family gradually becomes involved in the lives of a wealthy household."
+  },
+  {
+    "id": 5,
+    "title": "The Grand Budapest Hotel",
+    "year": 2014,
+    "genre": "Comedy",
+    "director": "Wes Anderson",
+    "description": "A hotel concierge and a lobby boy become caught up in a dispute over a valuable painting."
+  }
+]
