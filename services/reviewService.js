@@ -28,7 +28,56 @@ async function saveReview(title, rating, review) {
     review: review.trim()
   };
 }
+async function getReviews() {
+  const [rows] = await pool.query(
+    `SELECT
+       r.review_id,
+       r.rating,
+       r.review,
+       m.movie_id,
+       m.title
+     FROM reviews r
+     JOIN movies m ON r.movie_id = m.movie_id
+     ORDER BY r.review_id DESC`
+  );
 
+   return rows;
+}
+
+async function updateReview(reviewId, rating, review) {
+  const [result] = await pool.execute(
+    `UPDATE reviews
+     SET rating = ?, review = ?
+     WHERE review_id = ?`,
+    [Number(rating), review.trim(), reviewId]
+  );
+
+  if (result.affectedRows === 0) {
+    return null;
+  }
+
+  return {
+    review_id: Number(reviewId),
+    rating: Number(rating),
+    review: review.trim()
+  };
+}
+async function deleteReview(reviewId) {
+  const [result] = await pool.execute(
+    `DELETE FROM reviews
+     WHERE review_id = ?`,
+    [reviewId]
+  );
+
+  if (result.affectedRows === 0) {
+    return false;
+  }
+
+  return true;
+}
 module.exports = {
-  saveReview
+  saveReview,
+  getReviews,
+  updateReview,
+  deleteReview
 };
