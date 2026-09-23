@@ -28,12 +28,69 @@ searchForm.addEventListener("submit", async (event) => {
       return;
     }
 
+    const detailsResponse = await fetch(
+      `/api/movies/${data.movie_id}/details`
+    );
+
+    const detailsResult = await detailsResponse.json();
+
+    if (!detailsResponse.ok) {
+      searchMessage.textContent = detailsResult.message;
+      return;
+    }
+
+    const {
+      movie,
+      reviewSummary,
+      reviews
+    } = detailsResult.data;
+
+    let reviewSummaryHtml = "";
+
+    if (detailsResult.outcome === "movie_without_reviews") {
+      reviewSummaryHtml = `
+        <div class="movie-review-summary">
+          <p><strong>Average rating:</strong> No reviews yet</p>
+          <p>Be the first to review this movie.</p>
+        </div>
+      `;
+    } else {
+      reviewSummaryHtml = `
+        <div class="movie-review-summary">
+          <p><strong>Average rating:</strong> ${reviewSummary.averageRating}/5</p>
+          <p>
+            Based on ${reviewSummary.reviewCount}
+            ${reviewSummary.reviewCount === 1 ? "review" : "reviews"}
+          </p>
+        </div>
+      `;
+    }
+
+    const relatedReviewsHtml = reviews.length
+      ? reviews
+          .map(
+            (savedReview) => `
+              <article class="movie-related-review">
+                <p><strong>Rating:</strong> ${savedReview.rating}/5</p>
+                <p>${savedReview.review}</p>
+              </article>
+            `
+          )
+          .join("")
+      : "";
+
     movieResults.innerHTML = `
       <article class="movie-card">
-        <h3>${data.title}</h3>
-        <p class="movie-meta">${data.year} · ${data.genre}</p>
-        <p><strong>Director:</strong> ${data.director}</p>
-        <p>${data.description}</p>
+        <h3>${movie.title}</h3>
+        <p class="movie-meta">${movie.year} · ${movie.genre}</p>
+        <p><strong>Director:</strong> ${movie.director}</p>
+        <p>${movie.description}</p>
+
+        ${reviewSummaryHtml}
+
+        <div class="movie-related-reviews">
+          ${relatedReviewsHtml}
+        </div>
       </article>
     `;
   } catch (error) {

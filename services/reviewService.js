@@ -43,7 +43,17 @@ async function getReviews() {
 
    return rows;
 }
+async function findReviewsByMovieId(movieId) {
+    const [rows] = await pool.query(
+        `SELECT review_id, movie_id, rating, review
+         FROM reviews
+         WHERE movie_id = ?
+         ORDER BY review_id DESC`,
+        [movieId]
+    );
 
+    return rows;
+}
 async function updateReview(reviewId, rating, review) {
   const [result] = await pool.execute(
     `UPDATE reviews
@@ -76,8 +86,9 @@ async function deleteReview(reviewId) {
   return true;
 }
 module.exports = {
-  saveReview,
-  getReviews,
-  updateReview,
-  deleteReview
+    saveReview,
+    getReviews,
+    findReviewsByMovieId,
+    updateReview,
+    deleteReview
 };
