@@ -1,5 +1,7 @@
 const express = require("express");
 const {
+  validateReviewContent,
+  validateReviewId,
   saveReview,
   getReviews,
   updateReview,
@@ -8,30 +10,42 @@ const {
 
 const router = express.Router();
 
-router.get("/", async (req, res) => {
+router.get("/", async (req, res, next) => {
   try {
     const reviews = await getReviews();
 
     return res.json(reviews);
   } catch (error) {
-    console.error("Review retrieval failed:", error);
-
-    return res.status(500).json({
-      message: "Reviews could not be loaded. Please try again."
-    });
+    next(error);
   }
 });
-router.post("/", async (req, res) => {
+
+router.post("/", async (req, res, next) => {
   const { title, rating, review } = req.body;
 
-  if (!title?.trim() || rating == null || !review?.trim()) {
+  if (!title?.trim()) {
     return res.status(400).json({
-      message: "Please complete all review fields."
+      message: "Select a movie to review."
+    });
+  }
+
+  const validation = validateReviewContent({
+    rating,
+    review
+  });
+
+  if (!validation.valid) {
+    return res.status(400).json({
+      message: validation.message
     });
   }
 
   try {
-    const newReview = await saveReview(title, rating, review);
+    const newReview = await saveReview(
+      title,
+      validation.data.rating,
+      validation.data.review
+    );
 
     if (!newReview) {
       return res.status(404).json({
@@ -44,26 +58,33 @@ router.post("/", async (req, res) => {
       review: newReview
     });
   } catch (error) {
-    console.error("Review submission failed:", error);
-
-    return res.status(500).json({
-      message: "Your review could not be saved. Please try again."
-    });
+    next(error);
   }
 });
 
-router.put("/:reviewId", async (req, res) => {
-  const { reviewId } = req.params;
-  const { rating, review } = req.body;
+router.put("/:reviewId", async (req, res, next) => {
+  const idValidation = validateReviewId(req.params.reviewId);
 
-  if (rating == null || !review?.trim()) {
+  if (!idValidation.valid) {
     return res.status(400).json({
-      message: "Please complete the rating and review."
+      message: idValidation.message
+    });
+  }
+
+  const contentValidation = validateReviewContent(req.body);
+
+  if (!contentValidation.valid) {
+    return res.status(400).json({
+      message: contentValidation.message
     });
   }
 
   try {
-    const updatedReview = await updateReview(reviewId, rating, review);
+    const updatedReview = await updateReview(
+      idValidation.reviewId,
+      contentValidation.data.rating,
+      contentValidation.data.review
+    );
 
     if (!updatedReview) {
       return res.status(404).json({
@@ -76,18 +97,21 @@ router.put("/:reviewId", async (req, res) => {
       review: updatedReview
     });
   } catch (error) {
-    console.error("Review update failed:", error);
-
-    return res.status(500).json({
-      message: "Your review could not be updated. Please try again."
-    });
+    next(error);
   }
 });
-router.delete("/:reviewId", async (req, res) => {
-  const { reviewId } = req.params;
+
+router.delete("/:reviewId", async (req, res, next) => {
+  const idValidation = validateReviewId(req.params.reviewId);
+
+  if (!idValidation.valid) {
+    return res.status(400).json({
+      message: idValidation.message
+    });
+  }
 
   try {
-    const deleted = await deleteReview(reviewId);
+    const deleted = await deleteReview(idValidation.reviewId);
 
     if (!deleted) {
       return res.status(404).json({
@@ -99,11 +123,8 @@ router.delete("/:reviewId", async (req, res) => {
       message: "Your review was deleted successfully."
     });
   } catch (error) {
-    console.error("Review deletion failed:", error);
-
-    return res.status(500).json({
-      message: "Your review could not be deleted. Please try again."
-    });
+    next(error);
   }
 });
+
 module.exports = router;

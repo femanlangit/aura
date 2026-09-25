@@ -1,41 +1,91 @@
 const searchForm = document.getElementById("search-form");
 const searchInput = document.getElementById("search-title");
+const genreFilter = document.getElementById("genre-filter");
+const sortOrder = document.getElementById("sort-order");
 const searchMessage = document.getElementById("search-message");
 const movieResults = document.getElementById("movie-results");
 
 searchForm.addEventListener("submit", async (event) => {
   event.preventDefault();
 
-  const title = searchInput.value.trim();
+  const search = searchInput.value.trim();
+  const genre = genreFilter.value.trim();
+  const sort = sortOrder.value;
 
   searchMessage.textContent = "";
   movieResults.innerHTML = "";
 
-  if (!title) {
-    searchMessage.textContent = "Please enter a movie title.";
-    return;
-  }
+  const params = new URLSearchParams({
+    search,
+    genre,
+    sort
+  });
 
   try {
     const response = await fetch(
-      `/api/movies/search?title=${encodeURIComponent(title)}`
+      `/api/movies/search?${params.toString()}`
     );
 
-    const data = await response.json();
+    const result = await response.json();
 
     if (!response.ok) {
-      searchMessage.textContent = data.message;
+      searchMessage.textContent = result.message;
       return;
     }
 
-    const detailsResponse = await fetch(
-      `/api/movies/${data.movie_id}/details`
+    if (result.outcome === "no_movies_found") {
+      searchMessage.textContent =
+        "No movies match your current search and filter.";
+      return;
+    }
+
+    const movies = result.data.movies;
+
+    movieResults.innerHTML = movies
+      .map(
+        (movie) => `
+          <article class="movie-card">
+            <h3>${movie.title}</h3>
+            <p class="movie-meta">${movie.year} · ${movie.genre}</p>
+            <p><strong>Director:</strong> ${movie.director}</p>
+            <p>${movie.description}</p>
+            <button
+              type="button"
+              class="view-movie-details"
+              data-movie-id="${movie.movie_id}"
+            >
+              View Details
+            </button>
+          </article>
+        `
+      )
+      .join("");
+  } catch (error) {
+    searchMessage.textContent =
+      "Aura could not load the catalogue. Please try again.";
+  }
+});
+
+movieResults.addEventListener("click", async (event) => {
+  const detailsButton = event.target.closest(".view-movie-details");
+
+  if (!detailsButton) {
+    return;
+  }
+
+  const movieId = detailsButton.dataset.movieId;
+
+  searchMessage.textContent = "";
+
+  try {
+    const response = await fetch(
+      `/api/movies/${movieId}/details`
     );
 
-    const detailsResult = await detailsResponse.json();
+    const result = await response.json();
 
-    if (!detailsResponse.ok) {
-      searchMessage.textContent = detailsResult.message;
+    if (!response.ok) {
+      searchMessage.textContent = result.message;
       return;
     }
 
@@ -43,11 +93,11 @@ searchForm.addEventListener("submit", async (event) => {
       movie,
       reviewSummary,
       reviews
-    } = detailsResult.data;
+    } = result.data;
 
     let reviewSummaryHtml = "";
 
-    if (detailsResult.outcome === "movie_without_reviews") {
+    if (result.outcome === "movie_without_reviews") {
       reviewSummaryHtml = `
         <div class="movie-review-summary">
           <p><strong>Average rating:</strong> No reviews yet</p>
@@ -57,7 +107,10 @@ searchForm.addEventListener("submit", async (event) => {
     } else {
       reviewSummaryHtml = `
         <div class="movie-review-summary">
-          <p><strong>Average rating:</strong> ${reviewSummary.averageRating}/5</p>
+          <p>
+            <strong>Average rating:</strong>
+            ${reviewSummary.averageRating}/5
+          </p>
           <p>
             Based on ${reviewSummary.reviewCount}
             ${reviewSummary.reviewCount === 1 ? "review" : "reviews"}
@@ -95,7 +148,7 @@ searchForm.addEventListener("submit", async (event) => {
     `;
   } catch (error) {
     searchMessage.textContent =
-      "Aura could not complete the search. Please try again.";
+      "Aura could not load the movie details. Please try again.";
   }
 });
 const reviewForm = document.getElementById("review-form");

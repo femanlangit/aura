@@ -1,5 +1,52 @@
 const pool = require("../db/database");
+function validateReviewContent({ rating, review }) {
+  const numericRating = Number(rating);
+  const cleanedReview = typeof review === "string"
+    ? review.trim()
+    : "";
 
+  if (
+    !Number.isInteger(numericRating) ||
+    numericRating < 1 ||
+    numericRating > 5
+  ) {
+    return {
+      valid: false,
+      message: "Select a rating from 1 to 5."
+    };
+  }
+
+  if (!cleanedReview) {
+    return {
+      valid: false,
+      message: "Enter your review."
+    };
+  }
+
+  return {
+    valid: true,
+    data: {
+      rating: numericRating,
+      review: cleanedReview
+    }
+  };
+}
+
+function validateReviewId(reviewId) {
+  const numericReviewId = Number(reviewId);
+
+  if (!Number.isInteger(numericReviewId) || numericReviewId <= 0) {
+    return {
+      valid: false,
+      message: "Select a valid review."
+    };
+  }
+
+  return {
+    valid: true,
+    reviewId: numericReviewId
+  };
+}
 async function saveReview(title, rating, review) {
   const [movies] = await pool.query(
     `SELECT movie_id, title
@@ -86,9 +133,11 @@ async function deleteReview(reviewId) {
   return true;
 }
 module.exports = {
-    saveReview,
-    getReviews,
-    findReviewsByMovieId,
-    updateReview,
-    deleteReview
+  validateReviewContent,
+  validateReviewId,
+  saveReview,
+  getReviews,
+  findReviewsByMovieId,
+  updateReview,
+  deleteReview
 };

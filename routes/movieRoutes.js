@@ -1,29 +1,29 @@
 const express = require("express");
 const {
-    findMovieByTitle,
+    discoverMovies,
     getMovieDetails
 } = require("../services/movieService");
 
 const router = express.Router();
 
-router.get("/search", async (req, res) => {
-    const searchTitle = req.query.title;
+router.get("/search", async (req, res, next) => {
+    const criteria = {
+        search: req.query.search || "",
+        genre: req.query.genre || "",
+        sort: req.query.sort || "title_asc"
+    };
 
-    if (!searchTitle) {
-        return res.status(400).json({
-            message: "Please enter a movie title."
-        });
+    try {
+        const result = await discoverMovies(criteria);
+
+        if (!result.success) {
+            return res.status(400).json(result);
+        }
+
+        return res.json(result);
+    } catch (error) {
+        next(error);
     }
-
-    const movie = await findMovieByTitle(searchTitle);
-
-    if (!movie) {
-        return res.status(404).json({
-            message: "Movie not found in the Aura catalogue."
-        });
-    }
-
-    res.json(movie);
 });
 router.get("/:movieId/details", async (req, res, next) => {
     const movieId = Number(req.params.movieId);

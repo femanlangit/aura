@@ -33,23 +33,43 @@
     <section class="section" id="catalogue">
       <div class="section-heading">
         <p class="eyebrow">Movie Catalogue</p>
-        <h2>Search for a movie</h2>
-        <p>Enter a movie title to find it in the Aura catalogue.</p>
-      </div>
+       <h2>Discover movies</h2>
+<p>
+  Browse the catalogue or narrow the results by title and genre.
+</p>
+</div>
 
-      <form class="search-form" id="search-form">
-        <label for="search-title">Movie title</label>
+<form class="search-form" id="search-form">
+  <div class="form-field">
+    <label for="search-title">Movie title</label>
+    <input
+      type="text"
+      id="search-title"
+      name="search"
+      placeholder="Search by title"
+    >
+  </div>
 
-        <div class="search-controls">
-          <input
-            type="text"
-            id="search-title"
-            name="title"
-            placeholder="e.g., Interstellar"
-          >
-          <button type="submit">Search</button>
-        </div>
-      </form>
+  <div class="form-field">
+    <label for="genre-filter">Genre</label>
+    <input
+      type="text"
+      id="genre-filter"
+      name="genre"
+      placeholder="e.g., Drama"
+    >
+  </div>
+
+  <div class="form-field">
+    <label for="sort-order">Sort by title</label>
+    <select id="sort-order" name="sort">
+      <option value="title_asc">A to Z</option>
+      <option value="title_desc">Z to A</option>
+    </select>
+  </div>
+
+  <button type="submit">Find Movies</button>
+</form>
 
       <div
         class="message"
@@ -117,22 +137,12 @@
         ></div>
       </form>
 
-<div
-  class="message"
-  id="review-message"
-  role="status"
-  aria-live="polite"
-></div>
-</form>
-
-<div class="saved-reviews">
-  <h3>Saved Reviews</h3>
-  <div id="saved-reviews-list">
-    <!-- Saved reviews will appear here. -->
-  </div>
-</div>
-
-</section>
+      <div class="saved-reviews">
+        <h3>Saved Reviews</h3>
+        <div id="saved-reviews-list">
+          <!-- Saved reviews will appear here. -->
+        </div>
+      </div>
     </section>
   </main>
 
