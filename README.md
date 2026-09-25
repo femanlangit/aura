@@ -2,21 +2,34 @@
 
 Aura is a browser-based movie catalogue and review application built with HTML, CSS, JavaScript, Node.js, Express.js, and MySQL.
 
-This repository is used as a continuing worked example in Web Technology Applications (WTA).
+This repository is used as a continuing worked example in Web Technology Applications (WTA). The wta-week-7 tag preserves the Aura version used in the Weeks 6–7 worked example on functional completeness and reliability.
 
 ## Current Features
 
 Aura currently allows users to:
 
-- search the movie catalogue by title;
-- view movie information stored in MySQL;
+- browse the persisted movie catalogue;
+- search movies using a complete or partial title;
+- filter movies by genre;
+- sort movie results by title from A to Z or Z to A;
+- combine supported discovery criteria;
+- select a movie and view its stored information;
+- view reviews related to the selected movie;
+- view the number of reviews for the selected movie;
+- view the average rating calculated from its saved reviews;
 - submit and save movie ratings and reviews;
-- edit and delete saved reviews;
-- view reviews related to a selected movie;
-- view the number of reviews for a selected movie; and
-- view the average rating calculated from its saved reviews.
+- edit saved reviews; and
+- delete saved reviews.
 
-The application uses a frontend, an Express.js backend, and a MySQL database.
+The Weeks 6–7 implementation also:
+
+- validates supported request information in the backend;
+- distinguishes meaningful successful, empty, invalid, and not-found outcomes;
+- prevents unusable review data and identifiers from reaching dependent operations;
+- handles unexpected backend and database failures through centralized error-handling middleware; and
+- returns a safe technical-error response without exposing internal error details.
+
+The application uses one connected frontend, Express.js backend, and MySQL database across these workflows.
 
 ## Technologies Used
 
@@ -107,13 +120,27 @@ Then open:
 http://localhost:3000
 ```
 
-## Sample State
+## Weeks 6–7 Sample State
 
-The provided database setup allows the Week 6 workflow to be observed immediately.
+The provided database setup allows the completed Weeks 6–7 workflows to be observed and tested immediately.
 
 For example:
 
-- **Interstellar** has two saved reviews with ratings of 5 and 4. Aura displays an average rating of **4.5/5 based on 2 reviews**.
+- leaving the discovery criteria blank returns all five catalogue movies;
+- partial title, genre, and supported sorting criteria can be used to narrow or arrange the returned collection;
+- a valid criterion with no matching records produces an empty-result state rather than a technical failure;
+- **Interstellar** has two saved reviews with ratings of 5 and 4. Aura displays an average rating of **4.5/5 based on 2 reviews**; and
 - **Spirited Away** has no saved reviews. Aura displays **No reviews yet** instead of a misleading `0/5` rating.
 
+The backend also validates review information and identifiers independently of the frontend and distinguishes expected application outcomes from unexpected technical failures.
+
 These records are sample data for observing and testing the application's behavior.
+
+
+## WTA Reference Checkpoint
+
+The `wta-week-7` tag is the stable reference for the Aura version used in the WTA Weeks 6–7 worked example.
+
+Learners may inspect this repository to see how the selected code shown in the worked example fits within the complete project. Aura is a reference implementation, not a template to copy. WTA projects should implement the workflows, validation rules, data operations, and outcomes required by their own established scope.
+
+Later development may continue on the `main` branch without changing the tagged Weeks 6–7 reference.
