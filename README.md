@@ -2,7 +2,7 @@
 
 Aura is a browser-based movie catalogue and review application built with HTML, CSS, JavaScript, Node.js, Express.js, and MySQL.
 
-This repository is used as a continuing worked example in Web Technology Applications (WTA). The wta-week-7 tag preserves the Aura version used in the Weeks 6–7 worked example on functional completeness and reliability.
+This repository is used as a continuing worked example in Web Technology Application (WTA). Tagged checkpoints preserve the Aura versions used at different stages of the worked example so that later development does not change the earlier reference states.
 
 ## Current Features
 
@@ -31,6 +31,23 @@ The Weeks 6–7 implementation also:
 
 The application uses one connected frontend, Express.js backend, and MySQL database across these workflows.
 
+### Weeks 8–9 Security Strengthening
+
+The `wta-week-8-9-security` checkpoint extends the completed application where Aura's established behavior requires user identity and record-specific protection.
+
+At this checkpoint, Aura also:
+
+- authenticates prepared users using hashed passwords;
+- remembers authenticated identity through a server-side session;
+- requires authentication before a review can be submitted;
+- associates saved reviews with their authenticated owner;
+- restricts review editing and deletion to the review owner;
+- distinguishes unauthenticated, forbidden, invalid, not-found, and technical-failure outcomes where applicable;
+- keeps movie and review viewing publicly available; and
+- adjusts review-management controls according to the authenticated user while retaining backend enforcement of the restriction.
+
+This checkpoint deliberately stops after demonstrating the security decisions needed to make the relevant concepts concrete. It is not intended to demonstrate every possible account or security feature. Different WTA applications may require different protections based on their own established data, actions, and requirements.
+
 ## Technologies Used
 
 - HTML
@@ -49,11 +66,14 @@ aura/
 │   └── aura_setup.sql
 ├── db/
 │   └── database.js
+├── middleware/
+│   └── auth.js
 ├── public/
 │   ├── index.html
 │   ├── script.js
 │   └── styles.css
 ├── routes/
+│   ├── authRoutes.js
 │   ├── movieRoutes.js
 │   └── reviewRoutes.js
 ├── services/
@@ -67,7 +87,7 @@ aura/
 └── README.md
 ```
 
-The `database/aura_setup.sql` file creates the database structure and sample data used by this version of Aura.
+The database/aura_setup.sql file contains the database setup established for the earlier Aura implementation. Its readiness for reproducing the current application will be reviewed during later development.
 
 The `db/database.js` file manages the application's connection to MySQL.
 
@@ -120,27 +140,18 @@ Then open:
 http://localhost:3000
 ```
 
-## Weeks 6–7 Sample State
+## WTA Reference Checkpoints
 
-The provided database setup allows the completed Weeks 6–7 workflows to be observed and tested immediately.
+### Weeks 6–7
 
-For example:
+The `wta-week-7` tag is the stable reference for the Aura version used in the WTA Weeks 6–7 worked example on functional completeness and reliability.
 
-- leaving the discovery criteria blank returns all five catalogue movies;
-- partial title, genre, and supported sorting criteria can be used to narrow or arrange the returned collection;
-- a valid criterion with no matching records produces an empty-result state rather than a technical failure;
-- **Interstellar** has two saved reviews with ratings of 5 and 4. Aura displays an average rating of **4.5/5 based on 2 reviews**; and
-- **Spirited Away** has no saved reviews. Aura displays **No reviews yet** instead of a misleading `0/5` rating.
+### Weeks 8–9 Security Strengthening
 
-The backend also validates review information and identifiers independently of the frontend and distinguishes expected application outcomes from unexpected technical failures.
+The `wta-week-8-9-security` tag is the stable reference for the Aura version used in the security-strengthening worked example.
 
-These records are sample data for observing and testing the application's behavior.
+Learners may inspect these tagged versions to see how the selected code shown in each worked example fits within the complete project at that stage.
 
+Aura is a reference implementation, not a template to copy. WTA projects should examine their own established requirements, data, workflows, and implementation before deciding which strengthening changes are appropriate.
 
-## WTA Reference Checkpoint
-
-The `wta-week-7` tag is the stable reference for the Aura version used in the WTA Weeks 6–7 worked example.
-
-Learners may inspect this repository to see how the selected code shown in the worked example fits within the complete project. Aura is a reference implementation, not a template to copy. WTA projects should implement the workflows, validation rules, data operations, and outcomes required by their own established scope.
-
-Later development may continue on the `main` branch without changing the tagged Weeks 6–7 reference.
+Later development may continue on the `main` branch without changing these tagged reference states.
