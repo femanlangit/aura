@@ -2,12 +2,14 @@ const express = require("express");
 const {
   validateReviewContent,
   validateReviewId,
+  findReviewOwner,
   saveReview,
   getReviews,
   updateReview,
   deleteReview
 } = require("../services/reviewService");
 
+const { requireUser } = require("../middleware/auth");
 const router = express.Router();
 
 router.get("/", async (req, res, next) => {
@@ -20,7 +22,7 @@ router.get("/", async (req, res, next) => {
   }
 });
 
-router.post("/", async (req, res, next) => {
+router.post("/", requireUser, async (req, res, next) => {
   const { title, rating, review } = req.body;
 
   if (!title?.trim()) {
@@ -42,9 +44,10 @@ router.post("/", async (req, res, next) => {
 
   try {
     const newReview = await saveReview(
-      title,
-      validation.data.rating,
-      validation.data.review
+    title,
+    validation.data.rating,
+    validation.data.review,
+    req.session.user.id
     );
 
     if (!newReview) {
@@ -62,7 +65,7 @@ router.post("/", async (req, res, next) => {
   }
 });
 
-router.put("/:reviewId", async (req, res, next) => {
+router.put("/:reviewId", requireUser, async (req, res, next) => {
   const idValidation = validateReviewId(req.params.reviewId);
 
   if (!idValidation.valid) {
@@ -80,10 +83,27 @@ router.put("/:reviewId", async (req, res, next) => {
   }
 
   try {
+    const existingReview = await findReviewOwner(
+    idValidation.reviewId
+);
+
+if (!existingReview) {
+  return res.status(404).json({
+    message: "Review not found."
+  });
+}
+
+if (existingReview.user_id !== req.session.user.id) {
+  return res.status(403).json({
+    message: "You cannot change this review."
+  });
+}
+
     const updatedReview = await updateReview(
-      idValidation.reviewId,
-      contentValidation.data.rating,
-      contentValidation.data.review
+    idValidation.reviewId,
+    contentValidation.data.rating,
+    contentValidation.data.review,
+    req.session.user.id
     );
 
     if (!updatedReview) {
@@ -101,7 +121,7 @@ router.put("/:reviewId", async (req, res, next) => {
   }
 });
 
-router.delete("/:reviewId", async (req, res, next) => {
+router.delete("/:reviewId", requireUser, async (req, res, next) => {
   const idValidation = validateReviewId(req.params.reviewId);
 
   if (!idValidation.valid) {
@@ -111,7 +131,26 @@ router.delete("/:reviewId", async (req, res, next) => {
   }
 
   try {
-    const deleted = await deleteReview(idValidation.reviewId);
+    const existingReview = await findReviewOwner(
+    idValidation.reviewId
+);
+
+if (!existingReview) {
+  return res.status(404).json({
+    message: "Review not found."
+  });
+}
+
+if (existingReview.user_id !== req.session.user.id) {
+  return res.status(403).json({
+    message: "You cannot delete this review."
+  });
+}
+
+    const deleted = await deleteReview(
+    idValidation.reviewId,
+    req.session.user.id
+  );
 
     if (!deleted) {
       return res.status(404).json({

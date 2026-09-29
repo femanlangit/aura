@@ -292,3 +292,39 @@ footer p {
     border-radius: 0;
   }
 }
+
+[hidden] {
+  display: none !important;
+}
+
+.account-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+#account-status {
+  font-size: 0.95rem;
+}
+
+.account-controls button {
+  white-space: nowrap;
+}
+
+.sign-in-panel {
+  max-width: 1100px;
+  margin: 1rem auto;
+  padding: 1.25rem;
+}
+
+.sign-in-panel form {
+  max-width: 420px;
+  padding: 1.25rem;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+}
+
+.sign-in-panel .form-field {
+  margin-bottom: 1rem;
+}

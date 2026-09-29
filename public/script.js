@@ -1,3 +1,106 @@
+let currentUser = null;
+
+const accountStatus = document.getElementById("account-status");
+const signInButton = document.getElementById("sign-in-button");
+const signOutButton = document.getElementById("sign-out-button");
+const signInPanel = document.getElementById("sign-in-panel");
+const signInForm = document.getElementById("sign-in-form");
+const signInMessage = document.getElementById("sign-in-message");
+
+function updateAccountDisplay() {
+  if (currentUser) {
+    accountStatus.textContent = `Signed in as ${currentUser.email}`;
+    signInButton.hidden = true;
+    signOutButton.hidden = false;
+    signInPanel.hidden = true;
+    return;
+  }
+
+  accountStatus.textContent = "Not signed in";
+  signInButton.hidden = false;
+  signOutButton.hidden = true;
+}
+
+async function loadCurrentUser() {
+  try {
+    const response = await fetch("/api/auth/me");
+
+    if (!response.ok) {
+      currentUser = null;
+      updateAccountDisplay();
+      return;
+    }
+
+    const data = await response.json();
+    currentUser = data.user;
+    updateAccountDisplay();
+    await loadReviews();
+  } catch (error) {
+    currentUser = null;
+    updateAccountDisplay();
+  }
+}
+
+signInButton.addEventListener("click", () => {
+  signInPanel.hidden = false;
+  signInMessage.textContent = "";
+});
+
+signInForm.addEventListener("submit", async (event) => {
+  event.preventDefault();
+
+  const email = document.getElementById("sign-in-email").value.trim();
+  const password = document.getElementById("sign-in-password").value;
+
+  signInMessage.textContent = "";
+
+  try {
+    const response = await fetch("/api/auth/login", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        email,
+        password
+      })
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      signInMessage.textContent = data.message;
+      return;
+    }
+
+    currentUser = data.user;
+    signInForm.reset();
+    updateAccountDisplay();
+    await loadReviews();
+  } catch (error) {
+    signInMessage.textContent =
+      "Aura could not sign you in. Please try again.";
+  }
+});
+
+signOutButton.addEventListener("click", async () => {
+  try {
+    const response = await fetch("/api/auth/logout", {
+      method: "POST"
+    });
+
+    if (!response.ok) {
+      return;
+    }
+
+    currentUser = null;
+    updateAccountDisplay();
+    await loadReviews();
+  } catch (error) {
+    return;
+  }
+});
+
 const searchForm = document.getElementById("search-form");
 const searchInput = document.getElementById("search-title");
 const genreFilter = document.getElementById("genre-filter");
@@ -173,25 +276,35 @@ async function loadReviews() {
     }
 
     savedReviewsList.innerHTML = reviews
-      .map(
-        (savedReview) => `
-          <article
-            class="saved-review"
-            data-review-id="${savedReview.review_id}"
-            data-rating="${savedReview.rating}"
-            data-review="${savedReview.review}"
-          >
-            <h4>${savedReview.title}</h4>
-            <p><strong>Rating:</strong> ${savedReview.rating}/5</p>
-            <p>${savedReview.review}</p>
-            <div class="review-actions">
-              <button type="button" class="edit-review">Edit</button>
-              <button type="button" class="delete-review">Delete</button>
-            </div>
-          </article>
-        `
-      )
-      .join("");
+  .map((savedReview) => {
+    const isOwner =
+      currentUser &&
+      Number(savedReview.user_id) === Number(currentUser.id);
+
+    const reviewActions = isOwner
+      ? `
+        <div class="review-actions">
+          <button type="button" class="edit-review">Edit</button>
+          <button type="button" class="delete-review">Delete</button>
+        </div>
+      `
+      : "";
+
+    return `
+      <article
+        class="saved-review"
+        data-review-id="${savedReview.review_id}"
+        data-rating="${savedReview.rating}"
+        data-review="${savedReview.review}"
+      >
+        <h4>${savedReview.title}</h4>
+        <p><strong>Rating:</strong> ${savedReview.rating}/5</p>
+        <p>${savedReview.review}</p>
+        ${reviewActions}
+      </article>
+    `;
+  })
+  .join("");
   } catch (error) {
     savedReviewsList.innerHTML = "<p>Reviews could not be loaded.</p>";
   }
@@ -326,3 +439,4 @@ reviewForm.addEventListener("submit", async (event) => {
   }
 });
 loadReviews();
+loadCurrentUser();

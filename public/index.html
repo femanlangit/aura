@@ -16,8 +16,44 @@
         <a href="#catalogue">Catalogue</a>
         <a href="#review">Write a Review</a>
       </nav>
+      <div class="account-controls">
+      <span id="account-status">Not signed in</span>
+      <button type="button" id="sign-in-button">Sign In</button>
+      <button type="button" id="sign-out-button" hidden>Sign Out</button>
+    </div>
     </div>
   </header>
+
+  <section class="sign-in-panel" id="sign-in-panel" hidden>
+  <form id="sign-in-form">
+    <div class="form-field">
+      <label for="sign-in-email">Email</label>
+      <input
+        type="email"
+        id="sign-in-email"
+        required
+      >
+    </div>
+
+    <div class="form-field">
+      <label for="sign-in-password">Password</label>
+      <input
+        type="password"
+        id="sign-in-password"
+        required
+      >
+    </div>
+
+    <button type="submit">Sign In</button>
+
+    <div
+      class="message"
+      id="sign-in-message"
+      role="status"
+      aria-live="polite"
+    ></div>
+  </form>
+</section>
 
   <main>
     <section class="hero" id="home">

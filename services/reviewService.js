@@ -47,7 +47,19 @@ function validateReviewId(reviewId) {
     reviewId: numericReviewId
   };
 }
-async function saveReview(title, rating, review) {
+
+async function findReviewOwner(reviewId) {
+  const [rows] = await pool.execute(
+    `SELECT user_id
+     FROM reviews
+     WHERE review_id = ?`,
+    [reviewId]
+  );
+
+  return rows[0] || null;
+}
+
+async function saveReview(title, rating, review, userId) {
   const [movies] = await pool.query(
     `SELECT movie_id, title
      FROM movies
@@ -62,14 +74,15 @@ async function saveReview(title, rating, review) {
   }
 
   const [result] = await pool.execute(
-    `INSERT INTO reviews (movie_id, rating, review)
-     VALUES (?, ?, ?)`,
-    [movie.movie_id, Number(rating), review.trim()]
+    `INSERT INTO reviews (movie_id, user_id, rating, review)
+    VALUES (?, ?, ?, ?)`,
+    [movie.movie_id, userId, Number(rating), review.trim()]
   );
 
   return {
     review_id: result.insertId,
     movie_id: movie.movie_id,
+    user_id: userId,
     title: movie.title,
     rating: Number(rating),
     review: review.trim()
@@ -79,6 +92,7 @@ async function getReviews() {
   const [rows] = await pool.query(
     `SELECT
        r.review_id,
+       r.user_id,
        r.rating,
        r.review,
        m.movie_id,
@@ -101,12 +115,13 @@ async function findReviewsByMovieId(movieId) {
 
     return rows;
 }
-async function updateReview(reviewId, rating, review) {
+async function updateReview(reviewId, rating, review, userId) {
   const [result] = await pool.execute(
     `UPDATE reviews
      SET rating = ?, review = ?
-     WHERE review_id = ?`,
-    [Number(rating), review.trim(), reviewId]
+     WHERE review_id = ?
+       AND user_id = ?`,
+    [Number(rating), review.trim(), reviewId, userId]
   );
 
   if (result.affectedRows === 0) {
@@ -119,11 +134,12 @@ async function updateReview(reviewId, rating, review) {
     review: review.trim()
   };
 }
-async function deleteReview(reviewId) {
+async function deleteReview(reviewId, userId) {
   const [result] = await pool.execute(
     `DELETE FROM reviews
-     WHERE review_id = ?`,
-    [reviewId]
+     WHERE review_id = ?
+       AND user_id = ?`,
+    [reviewId, userId]
   );
 
   if (result.affectedRows === 0) {
@@ -135,6 +151,7 @@ async function deleteReview(reviewId) {
 module.exports = {
   validateReviewContent,
   validateReviewId,
+  findReviewOwner,
   saveReview,
   getReviews,
   findReviewsByMovieId,
