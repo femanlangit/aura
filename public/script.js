@@ -32,6 +32,7 @@ async function loadCurrentUser() {
     }
 
     const data = await response.json();
+
     currentUser = data.user;
     updateAccountDisplay();
     await loadReviews();
@@ -58,12 +59,12 @@ signInForm.addEventListener("submit", async (event) => {
     const response = await fetch("/api/auth/login", {
       method: "POST",
       headers: {
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
       },
       body: JSON.stringify({
         email,
-        password
-      })
+        password,
+      }),
     });
 
     const data = await response.json();
@@ -86,7 +87,7 @@ signInForm.addEventListener("submit", async (event) => {
 signOutButton.addEventListener("click", async () => {
   try {
     const response = await fetch("/api/auth/logout", {
-      method: "POST"
+      method: "POST",
     });
 
     if (!response.ok) {
@@ -121,7 +122,7 @@ searchForm.addEventListener("submit", async (event) => {
   const params = new URLSearchParams({
     search,
     genre,
-    sort
+    sort,
   });
 
   try {
@@ -195,7 +196,7 @@ movieResults.addEventListener("click", async (event) => {
     const {
       movie,
       reviewSummary,
-      reviews
+      reviews,
     } = result.data;
 
     let reviewSummaryHtml = "";
@@ -254,6 +255,7 @@ movieResults.addEventListener("click", async (event) => {
       "Aura could not load the movie details. Please try again.";
   }
 });
+
 const reviewForm = document.getElementById("review-form");
 const reviewMessage = document.getElementById("review-message");
 const savedReviewsList = document.getElementById("saved-reviews-list");
@@ -266,98 +268,107 @@ async function loadReviews() {
     const reviews = await response.json();
 
     if (!response.ok) {
-      savedReviewsList.innerHTML = "<p>Reviews could not be loaded.</p>";
+      savedReviewsList.innerHTML =
+        "<p>Reviews could not be loaded.</p>";
       return;
     }
 
     if (reviews.length === 0) {
-      savedReviewsList.innerHTML = "<p>No reviews have been submitted yet.</p>";
+      savedReviewsList.innerHTML =
+        "<p>No reviews have been submitted yet.</p>";
       return;
     }
 
     savedReviewsList.innerHTML = reviews
-  .map((savedReview) => {
-    const isOwner =
-      currentUser &&
-      Number(savedReview.user_id) === Number(currentUser.id);
+      .map((savedReview) => {
+        const isOwner =
+          currentUser &&
+          Number(savedReview.user_id) === Number(currentUser.id);
 
-    const reviewActions = isOwner
-      ? `
-        <div class="review-actions">
-          <button type="button" class="edit-review">Edit</button>
-          <button type="button" class="delete-review">Delete</button>
-        </div>
-      `
-      : "";
+        const reviewActions = isOwner
+          ? `
+              <div class="review-actions">
+                <button type="button" class="edit-review">
+                  Edit
+                </button>
+                <button type="button" class="delete-review">
+                  Delete
+                </button>
+              </div>
+            `
+          : "";
 
-    return `
-      <article
-        class="saved-review"
-        data-review-id="${savedReview.review_id}"
-        data-rating="${savedReview.rating}"
-        data-review="${savedReview.review}"
-      >
-        <h4>${savedReview.title}</h4>
-        <p><strong>Rating:</strong> ${savedReview.rating}/5</p>
-        <p>${savedReview.review}</p>
-        ${reviewActions}
-      </article>
-    `;
-  })
-  .join("");
+        return `
+          <article
+            class="saved-review"
+            data-review-id="${savedReview.review_id}"
+            data-rating="${savedReview.rating}"
+            data-review="${savedReview.review}"
+          >
+            <h4>${savedReview.title}</h4>
+            <p><strong>Rating:</strong> ${savedReview.rating}/5</p>
+            <p>${savedReview.review}</p>
+            ${reviewActions}
+          </article>
+        `;
+      })
+      .join("");
   } catch (error) {
-    savedReviewsList.innerHTML = "<p>Reviews could not be loaded.</p>";
+    savedReviewsList.innerHTML =
+      "<p>Reviews could not be loaded.</p>";
   }
 }
+
 savedReviewsList.addEventListener("click", async (event) => {
   const reviewCard = event.target.closest(".saved-review");
 
-if (!reviewCard) {
-  return;
-}
-
-const reviewId = reviewCard.dataset.reviewId;
-
-if (event.target.classList.contains("delete-review")) {
-  const confirmed = window.confirm(
-    "Delete this review? This action cannot be undone."
-  );
-
-  if (!confirmed) {
+  if (!reviewCard) {
     return;
   }
 
-  try {
-    const response = await fetch(`/api/reviews/${reviewId}`, {
-      method: "DELETE"
-    });
+  const reviewId = reviewCard.dataset.reviewId;
 
-    const data = await response.json();
+  if (event.target.classList.contains("delete-review")) {
+    const confirmed = window.confirm(
+      "Delete this review? This action cannot be undone."
+    );
 
-    reviewMessage.textContent = data.message;
-
-    if (response.ok) {
-      if (editingReviewId === reviewId) {
-        editingReviewId = null;
-        reviewForm.reset();
-        document.getElementById("review-title").disabled = false;
-        reviewForm.querySelector('button[type="submit"]').textContent =
-          "Submit Review";
-      }
-
-      await loadReviews();
+    if (!confirmed) {
+      return;
     }
-  } catch (error) {
-    reviewMessage.textContent =
-      "Your review could not be deleted. Please try again.";
+
+    try {
+      const response = await fetch(`/api/reviews/${reviewId}`, {
+        method: "DELETE",
+      });
+
+      const data = await response.json();
+
+      reviewMessage.textContent = data.message;
+
+      if (response.ok) {
+        if (editingReviewId === reviewId) {
+          editingReviewId = null;
+          reviewForm.reset();
+          document.getElementById("review-title").disabled = false;
+          reviewForm.querySelector(
+            'button[type="submit"]'
+          ).textContent = "Submit Review";
+        }
+
+        await loadReviews();
+      }
+    } catch (error) {
+      reviewMessage.textContent =
+        "Your review could not be deleted. Please try again.";
+    }
+
+    return;
   }
 
-  return;
-}
-
-if (!event.target.classList.contains("edit-review")) {
-  return;
-}
+  if (!event.target.classList.contains("edit-review")) {
+    return;
+  }
 
   editingReviewId = reviewCard.dataset.reviewId;
 
@@ -372,11 +383,11 @@ if (!event.target.classList.contains("edit-review")) {
 
   document.getElementById("review-title").disabled = true;
 
-  reviewForm.querySelector('button[type="submit"]').textContent =
-    "Save Changes";
+  reviewForm.querySelector(
+    'button[type="submit"]'
+  ).textContent = "Save Changes";
 
-  reviewMessage.textContent =
-    "Editing your saved review.";
+  reviewMessage.textContent = "Editing your saved review.";
 });
 
 reviewForm.addEventListener("submit", async (event) => {
@@ -395,48 +406,49 @@ reviewForm.addEventListener("submit", async (event) => {
 
   try {
     const response = editingReviewId
-  ? await fetch(`/api/reviews/${editingReviewId}`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        rating,
-        review
-      })
-    })
-  : await fetch("/api/reviews", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        title,
-        rating,
-        review
-      })
-    });
+      ? await fetch(`/api/reviews/${editingReviewId}`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            rating,
+            review,
+          }),
+        })
+      : await fetch("/api/reviews", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            title,
+            rating,
+            review,
+          }),
+        });
 
     const data = await response.json();
 
     reviewMessage.textContent = data.message;
 
     if (response.ok) {
-  reviewForm.reset();
+      reviewForm.reset();
+      editingReviewId = null;
 
-  editingReviewId = null;
+      document.getElementById("review-title").disabled = false;
 
-  document.getElementById("review-title").disabled = false;
+      reviewForm.querySelector(
+        'button[type="submit"]'
+      ).textContent = "Submit Review";
 
-  reviewForm.querySelector('button[type="submit"]').textContent =
-    "Submit Review";
-
-  await loadReviews();
-}
+      await loadReviews();
+    }
   } catch (error) {
     reviewMessage.textContent =
       "Aura could not submit your review. Please try again.";
   }
 });
+
 loadReviews();
 loadCurrentUser();

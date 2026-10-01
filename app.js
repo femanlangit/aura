@@ -1,3 +1,5 @@
+require("dotenv").config();
+
 const express = require("express");
 const session = require("express-session");
 
@@ -6,7 +8,7 @@ const reviewRoutes = require("./routes/reviewRoutes");
 const authRoutes = require("./routes/authRoutes");
 
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 
 app.use(express.static("public"));
 app.use(express.json());
@@ -15,7 +17,7 @@ app.use(
   session({
     secret: process.env.SESSION_SECRET,
     resave: false,
-    saveUninitialized: false
+    saveUninitialized: false,
   })
 );
 
@@ -24,16 +26,16 @@ app.use("/api/movies", movieRoutes);
 app.use("/api/reviews", reviewRoutes);
 
 app.use((error, req, res, next) => {
-    console.error(error);
+  console.error(error);
 
-    return res.status(500).json({
-        success: false,
-        outcome: "technical_error",
-        message: "The request could not be completed. Please try again.",
-        data: null
-    });
+  return res.status(500).json({
+    success: false,
+    outcome: "technical_error",
+    message: "The request could not be completed. Please try again.",
+    data: null,
+  });
 });
 
 app.listen(PORT, () => {
-    console.log(`Aura is running at http://localhost:${PORT}`);
+  console.log(`Aura is running at http://localhost:${PORT}`);
 });

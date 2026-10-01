@@ -6,7 +6,7 @@ This repository is used as a continuing worked example in Web Technology Applica
 
 ## Current Features
 
-Aura currently allows users to:
+Aura allows users to:
 
 - browse the persisted movie catalogue;
 - search movies using a complete or partial title;
@@ -16,26 +16,26 @@ Aura currently allows users to:
 - select a movie and view its stored information;
 - view reviews related to the selected movie;
 - view the number of reviews for the selected movie;
-- view the average rating calculated from its saved reviews;
+- view the average rating calculated from saved reviews; and
+- view saved reviews without signing in.
+
+Prepared users can also sign in to:
+
 - submit and save movie ratings and reviews;
-- edit saved reviews; and
-- delete saved reviews.
-
-The Weeks 6–7 implementation also:
-
-- validates supported request information in the backend;
-- distinguishes meaningful successful, empty, invalid, and not-found outcomes;
-- prevents unusable review data and identifiers from reaching dependent operations;
-- handles unexpected backend and database failures through centralized error-handling middleware; and
-- returns a safe technical-error response without exposing internal error details.
+- edit reviews they own; and
+- delete reviews they own.
 
 The application uses one connected frontend, Express.js backend, and MySQL database across these workflows.
 
-### Weeks 8–9 Security Strengthening
+## Weeks 8–9 Application Strengthening
 
-The `wta-week-8-9-security` checkpoint extends the completed application where Aura's established behavior requires user identity and record-specific protection.
+The Weeks 8–9 implementation builds on the functionally complete application established during Weeks 6–7.
 
-At this checkpoint, Aura also:
+Aura has been reviewed and strengthened where its actual implementation justified changes.
+
+### Security
+
+Aura:
 
 - authenticates prepared users using hashed passwords;
 - remembers authenticated identity through a server-side session;
@@ -46,7 +46,42 @@ At this checkpoint, Aura also:
 - keeps movie and review viewing publicly available; and
 - adjusts review-management controls according to the authenticated user while retaining backend enforcement of the restriction.
 
-This checkpoint deliberately stops after demonstrating the security decisions needed to make the relevant concepts concrete. It is not intended to demonstrate every possible account or security feature. Different WTA applications may require different protections based on their own established data, actions, and requirements.
+### Configuration
+
+Aura:
+
+- obtains database connection values from environment configuration;
+- obtains its session secret from environment configuration;
+- allows the application port to be supplied through the environment while retaining `3000` as the local default;
+- documents required environment variables through `.env.example`; and
+- keeps the local `.env` file out of the repository.
+
+### Maintainability
+
+Review modification previously repeated the same review-ID, existence, and ownership checks across update and delete routes.
+
+The current implementation places that shared responsibility in reusable review-ownership middleware while keeping review-content validation separate and retaining ownership protection in the database operations.
+
+### Integrated Verification
+
+The completed application was internally verified using selected end-to-end user journeys covering:
+
+- public movie discovery and retrieval;
+- authenticated review creation and later retrieval;
+- owner review update and later retrieval; and
+- prevention of another authenticated user modifying an owned review.
+
+The selected journeys passed during the final internal end-to-end testing of the application.
+
+### Deployment Readiness
+
+Aura's runtime, configuration, database setup, repository resources, and local-development assumptions were reviewed before the application moves to manual deployment.
+
+The database setup resource now reproduces the schema, ownership relationships, prepared users, catalogue data, and starting review data required by the current application.
+
+The setup was verified using a separate fresh database rather than relying only on the database accumulated during development.
+
+Aura has not yet been deployed at this checkpoint. Manual deployment and external testing follow after Milestone 2.
 
 ## Technologies Used
 
@@ -57,6 +92,9 @@ This checkpoint deliberately stops after demonstrating the security decisions ne
 - Express.js
 - MySQL
 - `mysql2`
+- `express-session`
+- `bcrypt`
+- `dotenv`
 
 ## Project Structure
 
@@ -67,7 +105,8 @@ aura/
 ├── db/
 │   └── database.js
 ├── middleware/
-│   └── auth.js
+│   ├── auth.js
+│   └── reviewOwnership.js
 ├── public/
 │   ├── index.html
 │   ├── script.js
@@ -87,13 +126,11 @@ aura/
 └── README.md
 ```
 
-The database/aura_setup.sql file contains the database setup established for the earlier Aura implementation. Its readiness for reproducing the current application will be reviewed during later development.
-
-The `db/database.js` file manages the application's connection to MySQL.
-
 ## Set Up the Project
 
-### 1. Install the dependencies
+### 1. Install the Dependencies
+
+Make sure Node.js and MySQL are available on the computer where Aura will run.
 
 From the Aura project folder, run:
 
@@ -101,7 +138,9 @@ From the Aura project folder, run:
 npm install
 ```
 
-### 2. Create the database
+The required Node.js packages are represented by the project's package files. The local `node_modules` folder does not need to be copied from another developer's computer.
+
+### 2. Create the Database
 
 Make sure MySQL is running.
 
@@ -113,32 +152,58 @@ mysql -u root -p < database/aura_setup.sql
 
 Enter your MySQL password when prompted.
 
-The setup script creates:
+The setup script creates the `aura_db` database and prepares:
 
-- the `aura_db` database;
-- the `movies` and `reviews` tables;
-- five sample catalogue movies; and
-- two sample reviews for Interstellar.
+- the `users`, `movies`, and `reviews` tables;
+- the relationships required for movie reviews and review ownership;
+- two prepared users for Aura's authentication and ownership workflows;
+- five prepared catalogue movies; and
+- two prepared Interstellar reviews.
 
-### 3. Configure the database connection
+The prepared data represents Aura's required reference starting state. Temporary records created during development and testing are not part of the setup resource.
+
+### 3. Configure the Application
 
 Use `.env.example` as the guide for creating your local `.env` file.
 
-Enter the MySQL settings for your own computer. Do not commit your `.env` file or database password to the repository.
+The application expects configuration for:
+
+```text
+DB_HOST
+DB_USER
+DB_PASSWORD
+DB_NAME
+SESSION_SECRET
+PORT
+```
+
+Provide values appropriate to the environment where Aura is being prepared.
+
+Do not commit the local `.env` file or actual credentials and secrets to the repository.
 
 ### 4. Start Aura
 
-Run:
+From the project folder, run:
 
 ```bash
 npm start
 ```
 
-Then open:
+With the provided local port configuration, Aura is available at:
 
 ```text
 http://localhost:3000
 ```
+
+Another environment may supply a different port without requiring the application source code to be rewritten.
+
+### Prepared Reference Accounts
+
+Aura does not include account registration because registration is outside the scope of this reference application.
+
+The prepared accounts allow the authentication and review-ownership workflows to be exercised after setup.
+
+Use the prepared credentials provided with the WTA worked example when those workflows need to be tested.
 
 ## WTA Reference Checkpoints
 
@@ -148,10 +213,14 @@ The `wta-week-7` tag is the stable reference for the Aura version used in the WT
 
 ### Weeks 8–9 Security Strengthening
 
-The `wta-week-8-9-security` tag is the stable reference for the Aura version used in the security-strengthening worked example.
+The `wta-week-8-9-security` tag is the stable reference for the Aura version used in Part 1 of the Weeks 8–9 worked example.
 
-Learners may inspect these tagged versions to see how the selected code shown in each worked example fits within the complete project at that stage.
+### Weeks 8–9 Final Strengthening and Deployment Readiness
 
-Aura is a reference implementation, not a template to copy. WTA projects should examine their own established requirements, data, workflows, and implementation before deciding which strengthening changes are appropriate.
+The final Weeks 8–9 tag preserves the Aura version after the remaining application-strengthening work, internal end-to-end testing, and deployment-readiness preparation are complete.
+
+Learners may inspect these tagged versions to see how selected code shown in each worked example fits within the complete project at that stage.
+
+Aura is a reference implementation, not a template to copy. WTA projects should examine their own established requirements, data, workflows, implementation, and dependencies before deciding which strengthening or deployment-readiness changes are appropriate.
 
 Later development may continue on the `main` branch without changing these tagged reference states.
